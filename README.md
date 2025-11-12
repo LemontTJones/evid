@@ -31,7 +31,7 @@ Evidences is an advanced FiveM script adding evidences like blood, fingerprints 
 > [!WARNING]
 > The script isn't working? Check your server's live-console for related errors. These will tell you if dependencies are missing or if other setup steps aren't completed. You receive support and can share your ideas at GitHub's Discussions.
 >
-> [![](https://img.shields.io/badge/CLICK_TO_ASK_FOR_HELP-orange?style=for-the-badge)](https://github.com/noobsystems/evidences/discussions/new?category=support)
+> [![](https://img.shields.io/badge/CLICK_TO_ASK_FOR_HELP-orange?style=for-the-badge)](https://github.com/noobsystems/evidences/discussions/new?category=support) [![](https://img.shields.io/badge/CHECK_GUIDES-orange?style=for-the-badge)](https://github.com/noobsystems/evidences/discussions/categories/guides)
 
 
 ## How to use this script?
