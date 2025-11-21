@@ -1,6 +1,6 @@
--- ox_inventory/data/items.lua dosyasına aşağıdaki ögeleri ekle
--- Köşeli parantezlerin içindeki öge adlarını değiştirme
--- Öge açıklamalarını ve düğme etiketlerini (labels) değiştirebilirsin
+-- Add the following items to ox_inventory/data/items.lua
+-- Do not change the item names inside the square brackets
+-- You may change the item descriptions and labels of buttons
 
 ['evidence_laptop'] = {
 	label = 'Kanıt Bilgisayarı',
