@@ -96,23 +96,3 @@ eventHandler.onLocal("onResourceStop", function(event)
         end
     end
 end)
-
-
--- for testing
-RegisterCommand("enterCall", function(source, args)
-    local channel <const> = args[1] or 99
-    exports['pma-voice']:addPlayerToCall(channel)
-end)
-
-RegisterCommand("leaveCall", function()
-    exports['pma-voice']:setCallChannel(0)
-end)
-
-RegisterCommand("enterRadio", function(source, args)
-    local channel <const> = args[1] or 1
-    exports['pma-voice']:addPlayerToRadio(channel)
-end)
-
-RegisterCommand("leaveRadio", function()
-    exports['pma-voice']:setRadioChannel(0)
-end)
