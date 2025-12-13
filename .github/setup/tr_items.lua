@@ -71,7 +71,7 @@
 },
 ['spy_microphone'] = {
     label = 'Casus Mikrofon',
-    description = 'Yakındaki kişileri gözlemlemek için mikrofon',
+    description = 'Kişileri dinlemek için mikrofon',
     weight = 1500,
     stack = true,
     close = true,
