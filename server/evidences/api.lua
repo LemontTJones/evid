@@ -36,11 +36,19 @@ function api.get(evidenceClass, owner)
     return cache[evidenceClass][owner]
 end
 
-RegisterNetEvent("evidences:new", function(evidenceClass, owner, fun, ...)
-    local object <const> = api.get(evidenceClass, owner)
-    if object then
-        object[fun](object, ...)
+-- Binds evidence or removes it
+---@param evidenceClass Evidence|string The class of the evidence or the name of that class
+---@param owner number|string The serverId of the related player or the owner of the evidence (dna key, fingerprint, weapon serial number)
+---@param fun string The method from the evidence object to execute
+---@param ... any The arguments passed to the method
+local function syncEvidence(evidenceClass, owner, fun, ...)
+    local evidenceHolder <const> = api.get(evidenceClass, owner)
+    if evidenceHolder then
+        evidenceHolder[fun](evidenceHolder, ...)
     end
-end)
+end
+
+RegisterNetEvent("evidences:syncEvidence", syncEvidence)
+exports("syncEvidence", syncEvidence)
 
 return api

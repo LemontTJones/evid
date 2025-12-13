@@ -58,7 +58,7 @@ AddEventHandler("ox_inventory:currentWeapon", function(weapon)
                         SetEntityAsMissionEntity(naturallySpawnedMagazine)
                         DeleteObject(naturallySpawnedMagazine)
 
-                        TriggerServerEvent("evidences:new", "MAGAZINE", weapon.metadata.serial, 
+                        TriggerServerEvent("evidences:syncEvidence", "MAGAZINE", weapon.metadata.serial, 
                             "atVehicleSeat", NetworkGetNetworkIdFromEntity(cache.vehicle), cache.seat, {
                                 plate = GetVehicleNumberPlateText(cache.vehicle),
                                 weaponLabel = weapon.label or "unknown",
@@ -89,7 +89,7 @@ AddEventHandler("ox_inventory:currentWeapon", function(weapon)
                         SetEntityAsMissionEntity(naturallySpawnedMagazine)
                         DeleteObject(naturallySpawnedMagazine)
 
-                        TriggerServerEvent("evidences:new", "MAGAZINE", weapon.metadata.serial,
+                        TriggerServerEvent("evidences:syncEvidence", "MAGAZINE", weapon.metadata.serial,
                             "atCoords", result.coords, {
                                 weaponLabel = weapon.label or "unknown",
                                 serialNumber = weapon.metadata.serial,

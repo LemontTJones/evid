@@ -33,14 +33,14 @@ AddEventHandler("gameEventTriggered", function(name, args)
                 if (args[12] or 0) == 1 then
                     local victim <const> = cache.serverId
                     local attacker <const> = GetPlayerServerId(NetworkGetPlayerIndexFromPed(args[2]))
-                    TriggerServerEvent("evidences:new", "BLOOD",
+                    TriggerServerEvent("evidences:syncEvidence", "BLOOD",
                         victim, "atWeaponOf", attacker)
                 end
                 
                 -- vehicle blood
                 if cache.vehicle then
                     if not IsPedOnAnyBike(ped) then
-                        TriggerServerEvent("evidences:new", "BLOOD", cache.serverId,
+                        TriggerServerEvent("evidences:syncEvidence", "BLOOD", cache.serverId,
                             "atVehicleSeat", NetworkGetNetworkIdFromEntity(cache.vehicle), cache.seat, {
                                 plate = GetVehicleNumberPlateText(cache.vehicle)
                             })
@@ -52,7 +52,7 @@ AddEventHandler("gameEventTriggered", function(name, args)
                 local coords <const> = GetEntityCoords(cache.ped)
                 local success <const>, groundZ <const> = GetGroundZFor_3dCoord(coords.x, coords.y, coords.z, false)
                 if success then
-                    TriggerServerEvent("evidences:new", "BLOOD", cache.serverId,
+                    TriggerServerEvent("evidences:syncEvidence", "BLOOD", cache.serverId,
                         "atCoords", vector3(coords.x, coords.y, groundZ))
                 end
             end

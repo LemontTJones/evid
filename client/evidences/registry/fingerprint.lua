@@ -22,11 +22,11 @@ lib.onCache("seat", function(value, oldValue)
         -- checking whether the number of seats is less than or equal to 4 is necessary as our logic doesn't work for busses
         if GetNumberOfVehicleDoors(vehicle) >= 2 and GetVehicleModelNumberOfSeats(entityModel) <= 4 then
             -- vehicle door fingerprint
-            TriggerServerEvent("evidences:new", "FINGERPRINT", cache.serverId,
+            TriggerServerEvent("evidences:syncEvidence", "FINGERPRINT", cache.serverId,
                 "atVehicleDoor", NetworkGetNetworkIdFromEntity(vehicle), seatId + 1 --[[doorId]], { plate = GetVehicleNumberPlateText(vehicle) })
         else
             -- vehicle fingerprint
-            TriggerServerEvent("evidences:new", "FINGERPRINT", cache.serverId,
+            TriggerServerEvent("evidences:syncEvidence", "FINGERPRINT", cache.serverId,
                 "atEntity", NetworkGetNetworkIdFromEntity(vehicle), { plate = GetVehicleNumberPlateText(vehicle) })
         end
     end
@@ -38,7 +38,7 @@ end)
 AddEventHandler("ox_inventory:usedItem", function(name, slotId)
     if string.sub(string.lower(name), 1, #"weapon") == "weapon" then
         if not config.isPedWearingGloves() then
-            TriggerServerEvent("evidences:new", "FINGERPRINT", cache.serverId, "atItem", cache.serverId, slotId)
+            TriggerServerEvent("evidences:syncEvidence", "FINGERPRINT", cache.serverId, "atItem", cache.serverId, slotId)
         end
     end
 end)

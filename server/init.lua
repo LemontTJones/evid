@@ -13,8 +13,7 @@ if require "server.items" then
     exports("getFingerprint", biometricData.getFingerprint)
     exports("getDNA", biometricData.getDNA)
 
-    local api <const> = require "server.evidences.api"
-    exports("get", api.get)
+    require "server.evidences.api"
 
     require "server.evidences.target_actions"
     require "server.evidences.registry.fingerprint"

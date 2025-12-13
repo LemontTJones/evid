@@ -294,12 +294,12 @@ exports("hydrogen_peroxide", function(data, slot)
     if weapon and weapon.slot and weapon.metadata then
         exports.ox_inventory:useItem(data, function(data)
             if weapon.metadata["FINGERPRINT"] then
-                TriggerServerEvent("evidences:new", "FINGERPRINT", weapon.metadata["FINGERPRINT"].owner,
+                TriggerServerEvent("evidences:syncEvidence", "FINGERPRINT", weapon.metadata["FINGERPRINT"].owner,
                     "removeFromItem", cache.serverId, weapon.slot)
             end
 
             if weapon.metadata["DNA"] then
-                TriggerServerEvent("evidences:new", "BLOOD", weapon.metadata["DNA"].owner,
+                TriggerServerEvent("evidences:syncEvidence", "BLOOD", weapon.metadata["DNA"].owner,
                     "removeFromItem", cache.serverId, weapon.slot)
             end
             

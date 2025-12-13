@@ -30,7 +30,7 @@ This item-based script provides law enforcement authorities with all the informa
 >     - [Wiretap App](https://github.com/noobsystems/evidences/wiki/Wiretap-App)
 > - [Evidence Boxes](https://github.com/noobsystems/evidences/wiki/Evidence-Boxes)
 > - [Implementing other frameworks](https://github.com/noobsystems/evidences/wiki/Implementing-other-frameworks)
-> - [Using the built-in API (server-only)](https://github.com/noobsystems/evidences/wiki/Using-the-built%E2%80%90in-API-(server%E2%80%90only))
+> - [Using the built‐in API](https://github.com/noobsystems/evidences/wiki/Using-the-built%E2%80%90in-API)
 
 > [!WARNING]
 > The script isn't working? Check your server's live-console for related errors. These will tell you if dependencies are missing or if other setup steps aren't completed. You receive support and can share your ideas at GitHub's Discussions.
