@@ -8,6 +8,7 @@ import fingerprintIcon from "../assets/app_icons/fingerprint.png";
 import dnaIcon from "../assets/app_icons/dna.png";
 import databaseIcon from "../assets/app_icons/database.png";
 import wiretapIcon from "../assets/app_icons/wiretap.png";
+import casesIcon from "../assets/app_icons/cases.png";
 
 export interface App {
     name: string;
