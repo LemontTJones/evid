@@ -10,4 +10,18 @@ function framework.getPlayerName(playerId)
     return player and (player.firstname .. " " .. player.lastname) or "undefined"
 end
 
+function framework.getPlayer(playerId)
+    local player <const> = exports.ND_Core:getPlayer(playerId)
+
+    if player then
+        return {
+            getName = function()
+                return framework.getPlayerName(playerId)
+            end
+        }
+    end
+
+    return nil
+end
+
 return framework

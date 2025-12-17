@@ -21,4 +21,18 @@ function framework.getPlayerName(playerId)
     return "undefined"
 end
 
+function framework.getPlayer(playerId)
+    local oxPlayer <const> = ox.GetPlayer(playerId)
+
+    if oxPlayer then
+        return {
+            getName = function()
+                return framework.getPlayerName(playerId)
+            end
+        }
+    end
+
+    return nil
+end
+
 return framework

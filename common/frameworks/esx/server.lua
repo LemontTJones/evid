@@ -11,4 +11,18 @@ function framework.getPlayerName(playerId)
     return xPlayer and xPlayer.getName() or "undefined"
 end
 
+function framework.getPlayer(playerId)
+    local xPlayer <const> = ESX.GetPlayerFromId(playerId)
+
+    if xPlayer then
+        return {
+            getName = function()
+                return xPlayer.getName()
+            end
+        }
+    end
+
+    return nil
+end
+
 return framework
