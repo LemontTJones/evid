@@ -12,6 +12,7 @@ import wiretapIcon from "../assets/app_icons/wiretap.png";
 // TODO: Create a cases.png icon and import it here
 // import casesIcon from "../assets/app_icons/cases.png";
 const casesIcon = databaseIcon; // Temporary: using database icon
+import casesIcon from "../assets/app_icons/cases.png";
 
 export interface App {
     name: string;
