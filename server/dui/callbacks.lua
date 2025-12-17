@@ -1,4 +1,5 @@
 local database <const> = require "server.dui.database"
+local casesDatabase <const> = require "server.dui.cases"
 local imagePath <const> = GetConvar("inventory:imagepath", "nui://ox_inventory/web/images") .. "/%s.png"
 
 -- https://github.com/CommunityOx/ox_inventory/blob/6be13009eebc618b282f584782d98ff16ea2f9ed/web/src/helpers/index.ts#L140
@@ -167,4 +168,91 @@ end)
 
 lib.callback.register("evidences:getWiretaps", function(source, arguments)
     return database.getWiretaps(arguments.limit, arguments.offset)
+end)
+
+-- Case Management Callbacks
+lib.callback.register("evidences:createCase", function(source, arguments)
+    local framework <const> = require "common.frameworks.framework"
+    local player <const> = framework.getPlayer(source)
+    if not player then return false end
+
+    local caseNumber <const> = arguments.caseNumber
+    local title <const> = arguments.title
+    local description <const> = arguments.description
+    local assignedTo <const> = arguments.assignedTo
+    local createdBy <const> = player.getName()
+
+    return casesDatabase.createCase(caseNumber, title, description, createdBy, assignedTo)
+end)
+
+lib.callback.register("evidences:updateCase", function(source, arguments)
+    local caseId <const> = arguments.caseId
+    local title <const> = arguments.title
+    local description <const> = arguments.description
+    local status <const> = arguments.status
+    local assignedTo <const> = arguments.assignedTo
+
+    return casesDatabase.updateCase(caseId, title, description, status, assignedTo)
+end)
+
+lib.callback.register("evidences:getCases", function(source, arguments)
+    local search <const> = arguments.search
+    local status <const> = arguments.status
+    local page <const> = arguments.page
+    local limit <const> = arguments.limit
+
+    return casesDatabase.getCases(search, status, page, limit)
+end)
+
+lib.callback.register("evidences:getCaseById", function(source, arguments)
+    return casesDatabase.getCaseById(arguments.caseId)
+end)
+
+lib.callback.register("evidences:deleteCase", function(source, arguments)
+    return casesDatabase.deleteCase(arguments.caseId)
+end)
+
+lib.callback.register("evidences:addEvidenceToCase", function(source, arguments)
+    local framework <const> = require "common.frameworks.framework"
+    local player <const> = framework.getPlayer(source)
+    if not player then return false end
+
+    local caseId <const> = arguments.caseId
+    local evidenceType <const> = arguments.evidenceType
+    local evidenceIdentifier <const> = arguments.evidenceIdentifier
+    local notes <const> = arguments.notes
+    local addedBy <const> = player.getName()
+
+    return casesDatabase.addEvidenceToCase(caseId, evidenceType, evidenceIdentifier, notes, addedBy)
+end)
+
+lib.callback.register("evidences:removeEvidenceFromCase", function(source, arguments)
+    return casesDatabase.removeEvidenceFromCase(arguments.evidenceId)
+end)
+
+lib.callback.register("evidences:getCaseEvidence", function(source, arguments)
+    return casesDatabase.getCaseEvidence(arguments.caseId)
+end)
+
+lib.callback.register("evidences:addCaseNote", function(source, arguments)
+    local framework <const> = require "common.frameworks.framework"
+    local player <const> = framework.getPlayer(source)
+    if not player then return false end
+
+    local caseId <const> = arguments.caseId
+    local note <const> = arguments.note
+    local createdBy <const> = player.getName()
+
+    return casesDatabase.addCaseNote(caseId, note, createdBy)
+end)
+
+lib.callback.register("evidences:getCaseNotes", function(source, arguments)
+    return casesDatabase.getCaseNotes(arguments.caseId)
+end)
+
+lib.callback.register("evidences:getCasesByEvidence", function(source, arguments)
+    local evidenceType <const> = arguments.evidenceType
+    local evidenceIdentifier <const> = arguments.evidenceIdentifier
+
+    return casesDatabase.getCasesByEvidence(evidenceType, evidenceIdentifier)
 end)
