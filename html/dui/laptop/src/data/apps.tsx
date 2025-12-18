@@ -9,9 +9,6 @@ import fingerprintIcon from "../assets/app_icons/fingerprint.png";
 import dnaIcon from "../assets/app_icons/dna.png";
 import databaseIcon from "../assets/app_icons/database.png";
 import wiretapIcon from "../assets/app_icons/wiretap.png";
-// TODO: Create a cases.png icon and import it here
-// import casesIcon from "../assets/app_icons/cases.png";
-const casesIcon = databaseIcon; // Temporary: using database icon
 import casesIcon from "../assets/app_icons/cases.png";
 
 export interface App {

@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import type { Case, CaseEvidence, CaseNote, CaseStatus } from "./CasesApp";
 import { useTranslation } from "../../../TranslationContext";
 import Spinner from "../../../atoms/Spinner";
+import EvidenceChooser, { type ChosenEvidence, type EvidenceDetails } from "../../../atoms/EvidenceChooser";
 
 interface CaseDetailProps {
     caseItem: Case;
@@ -23,6 +24,10 @@ export default function CaseDetail(props: CaseDetailProps) {
     const [newEvidenceType, setNewEvidenceType] = useState<"fingerprint" | "dna" | "magazine" | "other">("fingerprint");
     const [newEvidenceId, setNewEvidenceId] = useState("");
     const [newEvidenceNotes, setNewEvidenceNotes] = useState("");
+    const [evidenceSourceMode, setEvidenceSourceMode] = useState<"inventory" | "database" | "manual">("inventory");
+    const [chosenEvidence, setChosenEvidence] = useState<ChosenEvidence | null>(null);
+    const [databaseSearchResults, setDatabaseSearchResults] = useState<any[]>([]);
+    const [databaseSearchText, setDatabaseSearchText] = useState("");
 
     // Load evidence and notes
     const loadCaseData = useCallback(() => {
@@ -131,6 +136,66 @@ export default function CaseDetail(props: CaseDetailProps) {
             loadCaseData();
         });
     }, [loadCaseData]);
+
+    const handleEvidenceSelection = useCallback((label: string, imagePath: string, container: number | string, slot: number, identifier: string, _details: EvidenceDetails) => {
+        setChosenEvidence({
+            evidence: {
+                label: label,
+                imagePath: imagePath,
+                container: container,
+                slot: slot,
+                identifier: identifier
+            },
+            timestamp: new Date().getTime()
+        });
+        setNewEvidenceId(identifier);
+    }, []);
+
+    const handleDatabaseSearch = useCallback(() => {
+        if (!databaseSearchText.trim()) {
+            setDatabaseSearchResults([]);
+            return;
+        }
+
+        const types: ("fingerprint" | "dna")[] = [];
+        if (newEvidenceType === "fingerprint") types.push("fingerprint");
+        if (newEvidenceType === "dna") types.push("dna");
+
+        if (types.length === 0) {
+            setDatabaseSearchResults([]);
+            return;
+        }
+
+        fetch(`https://${location.host}/triggerServerCallback`, {
+            method: "post",
+            headers: { "Content-Type": "application/json; charset=UTF-8" },
+            body: JSON.stringify({
+                name: "evidences:getStoredBiometricDataEntries",
+                arguments: {
+                    types: types,
+                    search: databaseSearchText,
+                    page: 1
+                }
+            })
+        }).then(r => r.json()).then(response => {
+            setDatabaseSearchResults(response.entries || []);
+        });
+    }, [databaseSearchText, newEvidenceType]);
+
+    const handleSelectDatabaseEntry = useCallback((entry: any) => {
+        setNewEvidenceId(entry.identifier);
+    }, []);
+
+    const handleOpenAddEvidenceModal = useCallback(() => {
+        setShowAddEvidenceModal(true);
+        setNewEvidenceType("fingerprint");
+        setNewEvidenceId("");
+        setNewEvidenceNotes("");
+        setEvidenceSourceMode("inventory");
+        setChosenEvidence(null);
+        setDatabaseSearchResults([]);
+        setDatabaseSearchText("");
+    }, []);
 
     const getStatusColor = (status: string) => {
         switch (status) {
@@ -347,7 +412,7 @@ export default function CaseDetail(props: CaseDetailProps) {
                             {t("laptop.desktop_screen.cases_app.evidence")} ({evidence.length})
                         </h3>
                         <button
-                            onClick={() => setShowAddEvidenceModal(true)}
+                            onClick={handleOpenAddEvidenceModal}
                             style={{
                                 padding: "8px 16px",
                                 background: "#008080",
@@ -499,7 +564,10 @@ export default function CaseDetail(props: CaseDetailProps) {
                     background: "#c0c0c0",
                     border: "3px solid #000",
                     padding: "20px",
-                    minWidth: "500px",
+                    minWidth: "700px",
+                    maxWidth: "900px",
+                    maxHeight: "80vh",
+                    overflow: "auto",
                     boxShadow: "5px 5px 0px #000"
                 }}>
                     <h3 style={{ margin: "0 0 20px 0", fontFamily: "monospace" }}>
@@ -507,19 +575,27 @@ export default function CaseDetail(props: CaseDetailProps) {
                     </h3>
 
                     <div style={{ display: "flex", flexDirection: "column", gap: "15px" }}>
+                        {/* Evidence Type Selection */}
                         <div>
                             <label style={{ fontFamily: "monospace", fontSize: "14px", display: "block", marginBottom: "5px" }}>
                                 {t("laptop.desktop_screen.cases_app.evidence_type")}
                             </label>
                             <select
                                 value={newEvidenceType}
-                                onChange={(e) => setNewEvidenceType(e.target.value as any)}
+                                onChange={(e) => {
+                                    setNewEvidenceType(e.target.value as any);
+                                    setNewEvidenceId("");
+                                    setChosenEvidence(null);
+                                    setDatabaseSearchResults([]);
+                                    setDatabaseSearchText("");
+                                }}
                                 style={{
                                     width: "100%",
                                     padding: "8px",
                                     border: "2px solid #000",
                                     fontFamily: "monospace",
-                                    fontSize: "14px"
+                                    fontSize: "14px",
+                                    background: "white"
                                 }}
                             >
                                 <option value="fingerprint">{t("laptop.desktop_screen.cases_app.evidence_fingerprint")}</option>
@@ -529,24 +605,187 @@ export default function CaseDetail(props: CaseDetailProps) {
                             </select>
                         </div>
 
-                        <div>
-                            <label style={{ fontFamily: "monospace", fontSize: "14px", display: "block", marginBottom: "5px" }}>
-                                {t("laptop.desktop_screen.cases_app.evidence_identifier")} *
-                            </label>
-                            <input
-                                type="text"
-                                value={newEvidenceId}
-                                onChange={(e) => setNewEvidenceId(e.target.value)}
-                                style={{
-                                    width: "100%",
-                                    padding: "8px",
-                                    border: "2px solid #000",
-                                    fontFamily: "monospace",
-                                    fontSize: "14px"
-                                }}
-                            />
+                        {/* Source Mode Tabs - Only for fingerprint/DNA */}
+                        {(newEvidenceType === "fingerprint" || newEvidenceType === "dna") && (
+                            <div style={{ display: "flex", gap: "5px", borderBottom: "2px solid #000" }}>
+                                <button
+                                    onClick={() => {
+                                        setEvidenceSourceMode("inventory");
+                                        setNewEvidenceId("");
+                                        setChosenEvidence(null);
+                                    }}
+                                    style={{
+                                        padding: "8px 16px",
+                                        background: evidenceSourceMode === "inventory" ? "#008080" : "white",
+                                        color: evidenceSourceMode === "inventory" ? "white" : "#000",
+                                        border: "2px solid #000",
+                                        borderBottom: evidenceSourceMode === "inventory" ? "none" : "2px solid #000",
+                                        cursor: "pointer",
+                                        fontFamily: "monospace",
+                                        fontSize: "14px",
+                                        marginBottom: "-2px"
+                                    }}
+                                >
+                                    From Inventory
+                                </button>
+                                <button
+                                    onClick={() => {
+                                        setEvidenceSourceMode("database");
+                                        setNewEvidenceId("");
+                                        setDatabaseSearchResults([]);
+                                    }}
+                                    style={{
+                                        padding: "8px 16px",
+                                        background: evidenceSourceMode === "database" ? "#008080" : "white",
+                                        color: evidenceSourceMode === "database" ? "white" : "#000",
+                                        border: "2px solid #000",
+                                        borderBottom: evidenceSourceMode === "database" ? "none" : "2px solid #000",
+                                        cursor: "pointer",
+                                        fontFamily: "monospace",
+                                        fontSize: "14px",
+                                        marginBottom: "-2px"
+                                    }}
+                                >
+                                    Search Database
+                                </button>
+                                <button
+                                    onClick={() => {
+                                        setEvidenceSourceMode("manual");
+                                        setNewEvidenceId("");
+                                        setChosenEvidence(null);
+                                    }}
+                                    style={{
+                                        padding: "8px 16px",
+                                        background: evidenceSourceMode === "manual" ? "#008080" : "white",
+                                        color: evidenceSourceMode === "manual" ? "white" : "#000",
+                                        border: "2px solid #000",
+                                        borderBottom: evidenceSourceMode === "manual" ? "none" : "2px solid #000",
+                                        cursor: "pointer",
+                                        fontFamily: "monospace",
+                                        fontSize: "14px",
+                                        marginBottom: "-2px"
+                                    }}
+                                >
+                                    Manual Entry
+                                </button>
+                            </div>
+                        )}
+
+                        {/* Content based on source mode */}
+                        <div style={{ background: "white", border: "2px solid #000", padding: "15px", minHeight: "200px" }}>
+                            {/* Inventory Mode */}
+                            {evidenceSourceMode === "inventory" && (newEvidenceType === "fingerprint" || newEvidenceType === "dna") && (
+                                <div>
+                                    <p style={{ fontFamily: "monospace", fontSize: "14px", marginBottom: "10px" }}>
+                                        Select evidence from your inventory:
+                                    </p>
+                                    <EvidenceChooser
+                                        type={newEvidenceType === "fingerprint" ? "FINGERPRINT" : "DNA"}
+                                        chosenEvidence={chosenEvidence}
+                                        translations={{
+                                            noItemsWithEvidences: `No ${newEvidenceType} evidence in inventory`
+                                        }}
+                                        onEvidenceSelection={handleEvidenceSelection}
+                                    />
+                                    {chosenEvidence?.evidence && (
+                                        <div style={{ marginTop: "10px", padding: "10px", background: "#f0f0f0", border: "2px solid #000" }}>
+                                            <p style={{ fontFamily: "monospace", fontSize: "14px", fontWeight: "bold" }}>
+                                                Selected: {chosenEvidence.evidence.identifier}
+                                            </p>
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+
+                            {/* Database Search Mode */}
+                            {evidenceSourceMode === "database" && (newEvidenceType === "fingerprint" || newEvidenceType === "dna") && (
+                                <div>
+                                    <p style={{ fontFamily: "monospace", fontSize: "14px", marginBottom: "10px" }}>
+                                        Search stored biometric database:
+                                    </p>
+                                    <div style={{ display: "flex", gap: "10px", marginBottom: "15px" }}>
+                                        <input
+                                            type="text"
+                                            placeholder="Search by identifier, name, or birthdate..."
+                                            value={databaseSearchText}
+                                            onChange={(e) => setDatabaseSearchText(e.target.value)}
+                                            style={{
+                                                flex: 1,
+                                                padding: "8px",
+                                                border: "2px solid #000",
+                                                fontFamily: "monospace",
+                                                fontSize: "14px"
+                                            }}
+                                        />
+                                        <button
+                                            onClick={handleDatabaseSearch}
+                                            style={{
+                                                padding: "8px 16px",
+                                                background: "#008080",
+                                                color: "white",
+                                                border: "2px solid #000",
+                                                cursor: "pointer",
+                                                fontFamily: "monospace",
+                                                fontSize: "14px"
+                                            }}
+                                        >
+                                            Search
+                                        </button>
+                                    </div>
+                                    <div style={{ maxHeight: "250px", overflow: "auto" }}>
+                                        {databaseSearchResults.length === 0 ? (
+                                            <p style={{ fontFamily: "monospace", fontSize: "14px", color: "#666", textAlign: "center" }}>
+                                                {databaseSearchText ? "No results found" : "Enter search terms and click Search"}
+                                            </p>
+                                        ) : (
+                                            databaseSearchResults.map((entry, index) => (
+                                                <div
+                                                    key={index}
+                                                    onClick={() => handleSelectDatabaseEntry(entry)}
+                                                    style={{
+                                                        padding: "10px",
+                                                        marginBottom: "5px",
+                                                        border: "2px solid #000",
+                                                        background: newEvidenceId === entry.identifier ? "#008080" : "#f0f0f0",
+                                                        color: newEvidenceId === entry.identifier ? "white" : "#000",
+                                                        cursor: "pointer",
+                                                        fontFamily: "monospace",
+                                                        fontSize: "14px"
+                                                    }}
+                                                >
+                                                    <strong>{entry.identifier}</strong><br />
+                                                    {entry.firstname} {entry.lastname} - {entry.birthdate}
+                                                </div>
+                                            ))
+                                        )}
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Manual Entry Mode */}
+                            {(evidenceSourceMode === "manual" || newEvidenceType === "magazine" || newEvidenceType === "other") && (
+                                <div>
+                                    <label style={{ fontFamily: "monospace", fontSize: "14px", display: "block", marginBottom: "5px" }}>
+                                        {t("laptop.desktop_screen.cases_app.evidence_identifier")} *
+                                    </label>
+                                    <input
+                                        type="text"
+                                        value={newEvidenceId}
+                                        onChange={(e) => setNewEvidenceId(e.target.value)}
+                                        placeholder="Enter evidence identifier manually..."
+                                        style={{
+                                            width: "100%",
+                                            padding: "8px",
+                                            border: "2px solid #000",
+                                            fontFamily: "monospace",
+                                            fontSize: "14px"
+                                        }}
+                                    />
+                                </div>
+                            )}
                         </div>
 
+                        {/* Notes Section */}
                         <div>
                             <label style={{ fontFamily: "monospace", fontSize: "14px", display: "block", marginBottom: "5px" }}>
                                 {t("laptop.desktop_screen.cases_app.notes")}
@@ -555,6 +794,7 @@ export default function CaseDetail(props: CaseDetailProps) {
                                 value={newEvidenceNotes}
                                 onChange={(e) => setNewEvidenceNotes(e.target.value)}
                                 rows={3}
+                                placeholder="Add any additional notes about this evidence..."
                                 style={{
                                     width: "100%",
                                     padding: "8px",
@@ -566,6 +806,7 @@ export default function CaseDetail(props: CaseDetailProps) {
                             />
                         </div>
 
+                        {/* Action Buttons */}
                         <div style={{ display: "flex", gap: "10px", justifyContent: "flex-end", marginTop: "10px" }}>
                             <button
                                 onClick={() => setShowAddEvidenceModal(false)}
@@ -585,7 +826,7 @@ export default function CaseDetail(props: CaseDetailProps) {
                                 disabled={!newEvidenceId.trim()}
                                 style={{
                                     padding: "10px 20px",
-                                    background: !newEvidenceId.trim() ? "#ccc" : "#008080",
+                                    background: !newEvidenceId.trim() ? "#ccc" : "#4CAF50",
                                     color: "white",
                                     border: "2px solid #000",
                                     cursor: !newEvidenceId.trim() ? "not-allowed" : "pointer",
